@@ -1,19 +1,36 @@
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 
 char last_op;
 
-int read(std::istream *ss);
-int SM(std::istream *ss);
-int MD(std::istream *ss);
+int read(std::istream &ss);
+int SM(std::istream &ss);
+int MD(std::istream &ss);
 
-int read(std::istream *ss)
+class invalid_input 
+{
+    std::string ms;
+
+public:
+    
+    invalid_input(std::string x):ms(x){}
+    
+    std::string what()
+    {
+        return ms;
+    }
+};
+        
+
+int read(std::istream &ss)
 {
     int num = 0;
     char ch;
 
-        if (!(*ss >> ch)){
-            throw 1;
+        if (!(ss >> ch)){
+            throw invalid_input("Wrong input.");
         }
         switch (ch){
             case '-':
@@ -21,20 +38,20 @@ int read(std::istream *ss)
 
             case '0': case '1': case '2': case '3': case '4': 
             case '5': case '6': case '7': case '8': case '9':
-                ss -> putback(ch);
-                *ss >> num;
-                if (!(*ss >> last_op)){
+                ss.putback(ch);
+                ss >> num;
+                if (!(ss >> last_op)){
                     last_op = 'E';
                 }
                 return num;
 
             default:
-                throw 1;
+                throw invalid_input("Wrong input.");
         }   
     return num;
 }
 
-int SM(std::istream *ss)
+int SM(std::istream &ss)
 {
     int num = MD(ss);
     for (;;){
@@ -51,7 +68,7 @@ int SM(std::istream *ss)
     }
 }
 
-int MD(std::istream *ss)
+int MD(std::istream &ss)
 {
     int left = read(ss);
     for (;;){
@@ -63,7 +80,7 @@ int MD(std::istream *ss)
             {
                 int d = read(ss);
                 if (d == 0){
-                    throw 1;
+                    throw invalid_input("Division by 0.");
                 }
                 left /= d;
                 break;
@@ -79,22 +96,20 @@ int MD(std::istream *ss)
 
 int main(int argc, char** argv)
 {
-    std::istream *ss;
+    std::stringstream ss;
     switch (argc){
         case 2:
-            ss = new std::istringstream(argv[1]);
+            ss << argv[1];
             break;
         default:
-            std::cout << "error" << std::endl;
+            std::cout << "Wrong arguments." << std::endl;
             return 1;
     }
     try{
         std::cout <<  SM(ss)  << std::endl;
-    } catch (int) {
-        std::cout << "error" << std::endl;
-        delete ss;
+    } catch (invalid_input x) {
+        std::cout << x.what() << std::endl;
         return 1;
     }
-    delete ss;
     return 0;
 }
