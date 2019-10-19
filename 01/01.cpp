@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     }
     try{
         std::cout <<  SM(ss)  << std::endl;
-    } catch (invalid_input x) {
+    } catch (invalid_input  &x) {
         std::cout << x.what() << std::endl;
         return 1;
     }
