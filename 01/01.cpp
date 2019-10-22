@@ -15,7 +15,7 @@ class invalid_input
 
 public:
     
-    invalid_input(std::string x):ms(x){}
+    invalid_input(std::string& x):ms(x){}
     
     std::string what()
     {
