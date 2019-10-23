@@ -19,7 +19,7 @@ public:
             free(begin);
         }
     }
-    char* alloc(size_t& size)
+    char* alloc(size_t size)
     {
         if (current - begin + size > maxSz){
             return nullptr;
