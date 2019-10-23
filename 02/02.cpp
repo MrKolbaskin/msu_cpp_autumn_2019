@@ -6,7 +6,7 @@ class LinearAllocator
     size_t maxSz;
     char* current;
 public:
-    LinearAllocator(size_t& maxSize): maxSz(maxSize)
+    LinearAllocator(size_t maxSize): maxSz(maxSize)
     {
         if ((begin = (char*) malloc(maxSize)) == nullptr){
             throw std::bad_alloc();
