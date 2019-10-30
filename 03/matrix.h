@@ -6,10 +6,18 @@ public:
     
     Matrix_row(int* tmp, size_t count_col):row(tmp), col(count_col) {}
 
-    int& operator [](int index) const
+    int& operator [](int index)
     {
         if (index >= col){
             throw std::out_of_range("Index columns co big");
+        }
+        return row[index];
+    }
+
+    int operator [](int index) const
+    {
+        if (index >= col){
+            throw std::out_of_range("Index columns so big");
         }
         return row[index];
     }
@@ -40,9 +48,17 @@ public:
         }
         for (size_t i = 0; i < rows; ++i){
             for(size_t j = 0; j < col; ++j){
-               matr[i * col + j] = x[i][j];
+               matr[i * col + j] = x.get(i, j);
             }
         }
+    }
+
+    int get(size_t row_ind, size_t col_ind) const
+    {
+        if (row_ind >= rows || col_ind >= col){
+            throw std::out_of_range("Index so big");
+        }
+        return matr[row_ind * col + col_ind];
     }
 
 
@@ -56,13 +72,22 @@ public:
         return col;
     }
 
-    Matrix_row operator[] (int index_row) const
+    Matrix_row operator[] (int index_row)
     {
         if (index_row >= rows){
             throw std::out_of_range("Index row so big");
         } 
         return Matrix_row(matr + index_row * col, col);
     }
+
+    const Matrix_row operator[] (int index_row) const
+    {
+        if(index_row >= rows){
+            throw std::out_of_range("Index row so big");
+        }
+        return Matrix_row(matr + index_row * col, col);
+   } 
+
 
     Matrix& operator*= (int mul)
     {

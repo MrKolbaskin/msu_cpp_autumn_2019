@@ -33,7 +33,6 @@ int main()
     check_throw(m1[2][0], std::out_of_range);
 
     m1 *= 2;
-
     const Matrix& m2 = m1;
 
     check_equal(m2[0][0], 1 * 2);
