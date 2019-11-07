@@ -9,7 +9,7 @@ public:
         sign = true;
         num = new char [len];
         num[0] = 0;
-    };
+    }
 
     BigInt(long long n)
     {
