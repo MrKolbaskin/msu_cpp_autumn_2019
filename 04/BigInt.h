@@ -7,8 +7,8 @@ public:
     BigInt(){
         len = 1;
         sign = true;
-        num = new char [len];
-        num[0] = 0;
+        num = new char;
+        *num = 0;
     }
 
     BigInt(long long n)
