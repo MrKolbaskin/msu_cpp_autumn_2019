@@ -37,12 +37,14 @@
         }
     }
 
-    BigInt::BigInt(char *n, int l, bool s)//=true)
+    BigInt::BigInt(char *n, int l, bool s)
     {
         len = l;
         sign = s;
         num = new char [len];
-        std::memcpy(num, n, len);
+        for (int i = 0; i < len; ++i){
+            num[i] = n[i];
+        }
     }
 
     BigInt::BigInt(BigInt&& x)
@@ -65,7 +67,9 @@
     char* BigInt::get_num() const
     {
         char* num_cp = new char [len];
-        std::memcpy(num_cp, num, len);
+        for (int i = 0; i < len; ++i){
+            num_cp[i] = num[i];
+        }
         return num_cp;
     }
 
@@ -136,7 +140,9 @@
         if (num1[len_num1 - 1] >= 10){
             char* tmp = num1;
             num1 = new char [len_num1 + 1];
-            std::memcpy(num1, tmp, len_num1);
+            for (int i = 0; i < len_num1; ++i){
+                num1[i] = tmp[i];
+            }
             delete [] tmp;
             num1[len_num1] = num1[len_num1 - 1] / 10;
             num1[len_num1 - 1] %= 10;
@@ -282,7 +288,9 @@
 
         char *tmp = num1;
         num1 = new char[len_num1];
-        std::memcpy (num1, tmp, len_num1);
+        for (int i = 0; i < len_num1; ++i){
+            num1[i] = tmp[i];
+        }
         delete [] num2;
         delete [] tmp;
 
