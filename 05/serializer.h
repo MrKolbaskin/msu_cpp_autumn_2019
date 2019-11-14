@@ -10,11 +10,11 @@ enum class Error
 class Serializer
 {
     static constexpr char Separator = ' ';
-    std::ostream* out;
+    std::ostream& out;
 
     template <class T, class... ArgsT>
     Error process(T x, ArgsT... args){
-        if (sizeof...(args) == 0){
+        if constexpr (sizeof...(args) == 0){
             return save_arg(x);
         } else {
             save_arg(x);
@@ -30,13 +30,13 @@ class Serializer
     
     Error save_arg(bool x)
     {
-        *out << (x? "true": "false") << Separator;
+        out << (x? "true": "false") << Separator;
         return Error::NoError;
     }
 
     Error save_arg(uint64_t x)
     {
-        *out << x << Separator;
+        out << x << Separator;
         return Error::NoError;
     }
 public:
@@ -50,24 +50,21 @@ public:
         return process(args...);
     }
 
-    explicit Serializer(std::ostream* x):out(x){}
+    explicit Serializer(std::ostream& x):out(x){}
 };
 
 
 class Deserializer
 {
-    std::istream* in;
+    std::istream& in;
 
     template <class T, class... ArgsT>
     Error process(T &x, ArgsT&... args)
     {
         if (sizeof...(args) == 0){
-            if (get_value(x)){
-                return Error::CorruptedArchive;
-            }
-            return Error::NoError;
+            return get_value(x);
         }
-        if (get_value(x)){
+        if (get_value(x) == Error::CorruptedArchive){
             return Error::CorruptedArchive;
         }
         return process(args...);
@@ -75,33 +72,30 @@ class Deserializer
 
     template<class T>
     Error process(T &x){
-        if (get_value(x)) {
-            return Error::CorruptedArchive;
-        }
-        return Error::NoError;
+        return get_value(x);
     }
 
-    bool get_value(bool &x){
+    Error get_value(bool &x){
         std::string val;
-        *in >> val;
+        in >> val;
         if (val == "true"){
             x = true;
         } else if (val == "false"){
             x = false;
         } else {
-            return true;
+            return Error::CorruptedArchive;
         }
-        return false;
+        return Error::NoError;
     }
     
-    bool get_value(uint64_t &x){
+    Error get_value(uint64_t &x){
         std::string val;
-        *in >> val;
+        in >> val;
         if (!isdigit(val[0])){
-            return true;
+            return Error::CorruptedArchive;
         } else {
             x = std::stoull(val);
-            return false;
+            return Error::NoError;
         }
     }
 public:
@@ -115,5 +109,5 @@ public:
         return process(args...);
     }
 
-    explicit Deserializer(std::istream* x):in(x){}
+    explicit Deserializer(std::istream& x):in(x){}
 };

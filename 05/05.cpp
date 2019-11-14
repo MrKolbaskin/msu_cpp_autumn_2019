@@ -31,12 +31,12 @@ int main()
 
     std::stringstream s1;
 
-    Serializer serializer(&s1);
+    Serializer serializer(s1);
     checkTrue(serializer.save(x) == Error::NoError);
 
     Data y { 0, false, 0 };
 
-    Deserializer d1(&s1);
+    Deserializer d1(s1);
     checkTrue(d1.load(y) == Error::NoError);
 
     checkEqual(x.a, y.a);
@@ -44,25 +44,25 @@ int main()
     checkEqual(x.c, y.c);
 
     auto s2 = std::stringstream("");
-    Deserializer d2(&s2);
+    Deserializer d2(s2);
     checkTrue(d2.load(y) == Error::CorruptedArchive);
 
     auto s3 = std::stringstream("1 2 3");
-    Deserializer d3(&s3);
+    Deserializer d3(s3);
     checkTrue(d3.load(y) == Error::CorruptedArchive);
 
     auto s4 = std::stringstream("1 true -3");
-    Deserializer d4(&s4);
+    Deserializer d4(s4);
     checkTrue(d4.load(y) == Error::CorruptedArchive);
 
     auto s5 = std::stringstream("false 1");
-    Deserializer d5(&s5);
+    Deserializer d5(s5);
     checkTrue(d5.load(y) == Error::CorruptedArchive);
 
     y = { 0, true, 0 };
 
     auto s6 = std::stringstream("100 false 500");
-    Deserializer d6(&s6);
+    Deserializer d6(s6);
     checkTrue(d6.load(y) == Error::NoError);
 
     checkEqual(y.a, 100);
