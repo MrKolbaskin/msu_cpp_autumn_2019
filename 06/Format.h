@@ -6,17 +6,8 @@
 #include <vector>
 #include <cctype>
 
-size_t to_num(std::string& x)
-{
-	size_t res;
-	std::stringstream ss;
-	ss << x;
-	ss >> res;
-	return res;
-}
-
 template <class T>
-std::string to_string1(T&& x){
+std::string to_string(T&& x){
 	std::stringstream ss;
 	ss << x;
 	return ss.str();
@@ -26,7 +17,7 @@ std::string to_string1(T&& x){
 template <class... argsT>
 std::string format(const std::string& str, argsT&&... obj)
 {
-	std::vector<std::string> args{to_string1(std::forward<argsT>(obj))...};
+	std::vector<std::string> args{to_string(std::forward<argsT>(obj))...};
 	std::ostringstream res;
 
 	for (size_t i = 0; i < str.length(); ++i){
@@ -35,7 +26,7 @@ std::string format(const std::string& str, argsT&&... obj)
 			if (str[i] == '}'){
 				throw std::runtime_error("No_index");
 			}
-			size_t a;
+			size_t id;
 			std::string tmp_num;
 			while(str[i] != '}' && i < str.length()){
 				if (std::isdigit(str[i])){
@@ -48,9 +39,9 @@ std::string format(const std::string& str, argsT&&... obj)
 			if (i == str.length()){
 				throw std::runtime_error("Wrong_format");
 			}
-			a = to_num(tmp_num);
-			if (a < args.size()){
-				res << args[a];
+			id = std::stoull(tmp_num);
+			if (id < args.size()){
+				res << args[id];
 			} else {
 				throw std::runtime_error("Big_index");
 			}
