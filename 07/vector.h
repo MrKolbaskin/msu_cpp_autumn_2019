@@ -1,7 +1,5 @@
-#include <iostream>
-#include <exception>
-#include <limits>
-#include <iterator>
+#ifndef VECTOR_CLASS
+#define VECTOR_CLASS 
 
 
 template <class T>
@@ -212,3 +210,5 @@ public:
         }
     }
 };
+
+#endif
