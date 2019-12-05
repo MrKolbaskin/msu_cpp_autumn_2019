@@ -10,16 +10,25 @@ public:
     using pointer = T*;
     using size_type = size_t;
 
-    Allocator(){}
-
     pointer allocate(size_type count){
         return (pointer) malloc(sizeof(value_type) * count);
     }
+
+    void construct(pointer ptr, size_type count){
+        for (size_type i = 0; i < count; ++i) {
+            new (ptr + i) value_type();
+        }
+    }
+
     void deallocate(pointer ptr, size_type count){
+        //destructor(ptr, count);
+        free(ptr); 
+    }
+
+    void destructor(pointer ptr, size_type count){
         for(size_t i = 0; i < count; ++i){
             ptr[i].~value_type();
         }
-        free(ptr); 
     }
 
     size_t max_size(){
@@ -94,7 +103,7 @@ class Vector
     T* v;
     size_t size_;
     size_t capacity_;
-    Alloc alloc_;
+    Alloc alloc_ = Alloc();
 public:
     using iterator = Iterator<T>;
     using value_type = T;
@@ -102,13 +111,14 @@ public:
 
     Vector(){
         alloc_ = Alloc();
-        v = alloc_.allocate(1);
         size_ = 0;
-        capacity_ = 1;
+        capacity_ = 0;
+        v = nullptr;
     }
 
     ~Vector(){
-        alloc_.deallocate(v, size_);
+        alloc_.destructor(v, size_);
+        alloc_.deallocate(v, capacity_);
     }
 
     Vector(size_t count){
@@ -142,21 +152,30 @@ public:
     }
 
     void push_back(T&& val){
-        if (size_ == capacity_){
+        if (capacity_ == 0){
+            v = alloc_.allocate(1);
+            v[0] = std::move(val);
+            size_ = 1;
+            capacity_ = 1;
+        }
+        else if (size_ == capacity_){
             auto new_v = alloc_.allocate(capacity_ * 2);
             std::copy(v, v + size_, new_v);
+            alloc_.destructor(v, size_);
             alloc_.deallocate(v, capacity_);
             v = new_v;
+            v[size_++] = std::move(val);
             capacity_ *= 2;
+        } else {
+            v[size_++] = std::move(val);
         }
-        v[size_++] = val;
     }
 
     void pop_back(){
         if (size_ == 0){
             throw std::runtime_error("You have empty vector");
         }
-        v[size_ - 1].~value_type();
+        alloc_.destructor(v + size_ - 1, 1);
         size_--;
     }
 
@@ -173,29 +192,24 @@ public:
     }
 
     void clear(){
-        for(size_t i = 0; i < size_; ++i){
-            v[i].~value_type();
-        }
+        alloc_.destructor(v, size_);
         size_ = 0;
     }
 
     void resize(size_t nSize){
         if (nSize < size_){
-            for(size_t i = nSize; i < size_; ++i){
-                v[i].~value_type();
-            }
+            alloc_.destructor(v + nSize, size_ - nSize);
             size_ = nSize;
         } else if(nSize > size_){
             if (nSize > capacity_){
                 auto new_v = alloc_.allocate(nSize);
                 std::copy(v, v + size_, new_v);
-                alloc_.deallocate(v, size_);
+                alloc_.destructor(v, size_);
+                alloc_.deallocate(v, capacity_);
                 v = new_v;
                 capacity_ = nSize;
             }
-            for(size_t i = size_; i < nSize; ++i){
-                new (v + i) value_type();
-            }
+            alloc_.construct(v + size_, nSize - size_);
             size_ = nSize;
         }
     }
@@ -204,6 +218,7 @@ public:
         if (n > capacity_){
             pointer new_v = alloc_.allocate(n);
             std::copy(v, v + size_, new_v);
+            alloc_.destructor(v, size_);
             alloc_.deallocate(v, size_);
             v = new_v;
             capacity_ = n;
