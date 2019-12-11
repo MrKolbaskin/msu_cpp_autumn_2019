@@ -20,8 +20,11 @@ public:
         }
     }
 
+    void construct(pointer ptr, value_type val){
+        new (ptr) value_type(val);
+    }
+
     void deallocate(pointer ptr, size_type count){
-        //destructor(ptr, count);
         free(ptr); 
     }
 
@@ -103,14 +106,13 @@ class Vector
     T* v;
     size_t size_;
     size_t capacity_;
-    Alloc alloc_ = Alloc();
+    Alloc alloc_;
 public:
     using iterator = Iterator<T>;
     using value_type = T;
     using pointer = T*;
 
     Vector(){
-        alloc_ = Alloc();
         size_ = 0;
         capacity_ = 0;
         v = nullptr;
@@ -122,7 +124,6 @@ public:
     }
 
     Vector(size_t count){
-        alloc_ = Alloc();
         v = alloc_.allocate(count);
         size_ = 0;
         capacity_ = count;
@@ -160,7 +161,11 @@ public:
         }
         else if (size_ == capacity_){
             auto new_v = alloc_.allocate(capacity_ * 2);
-            std::copy(v, v + size_, new_v);
+
+            for (size_t i = 0; i < size_; ++i){
+                alloc_.construct(new_v + i, v[i]);
+            }
+
             alloc_.destructor(v, size_);
             alloc_.deallocate(v, capacity_);
             v = new_v;
@@ -203,7 +208,11 @@ public:
         } else if(nSize > size_){
             if (nSize > capacity_){
                 auto new_v = alloc_.allocate(nSize);
-                std::copy(v, v + size_, new_v);
+
+                for (size_t i = 0; i < size_; ++i){
+                alloc_.construct(new_v + i, v[i]);
+                }
+
                 alloc_.destructor(v, size_);
                 alloc_.deallocate(v, capacity_);
                 v = new_v;
@@ -217,7 +226,11 @@ public:
     void reserve(size_t n){
         if (n > capacity_){
             pointer new_v = alloc_.allocate(n);
-            std::copy(v, v + size_, new_v);
+
+            for (size_t i = 0; i < size_; ++i){
+                alloc_.construct(new_v + i, v[i]);
+            }
+
             alloc_.destructor(v, size_);
             alloc_.deallocate(v, size_);
             v = new_v;
