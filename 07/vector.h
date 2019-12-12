@@ -155,7 +155,7 @@ public:
     void push_back(T&& val){
         if (capacity_ == 0){
             v = alloc_.allocate(1);
-            v[0] = std::move(val);
+            v[0] = val;
             size_ = 1;
             capacity_ = 1;
         }
@@ -169,10 +169,10 @@ public:
             alloc_.destructor(v, size_);
             alloc_.deallocate(v, capacity_);
             v = new_v;
-            v[size_++] = std::move(val);
+            v[size_++] = val;
             capacity_ *= 2;
         } else {
-            v[size_++] = std::move(val);
+            v[size_++] = val;
         }
     }
 
