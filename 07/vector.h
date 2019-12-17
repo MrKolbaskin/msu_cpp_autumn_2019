@@ -155,7 +155,7 @@ public:
     void push_back(T&& val){
         if (capacity_ == 0){
             v = alloc_.allocate(1);
-            v[0] = val;
+            alloc_.construct(v, val);
             size_ = 1;
             capacity_ = 1;
         }
@@ -169,10 +169,12 @@ public:
             alloc_.destructor(v, size_);
             alloc_.deallocate(v, capacity_);
             v = new_v;
-            v[size_++] = val;
+            alloc_.construct(v + size_, val);
+            size_++;
             capacity_ *= 2;
         } else {
-            v[size_++] = val;
+            alloc_.construct(v + size_, val);
+            size_++;
         }
     }
 
@@ -210,7 +212,7 @@ public:
                 auto new_v = alloc_.allocate(nSize);
 
                 for (size_t i = 0; i < size_; ++i){
-                alloc_.construct(new_v + i, v[i]);
+                    alloc_.construct(new_v + i, v[i]);
                 }
 
                 alloc_.destructor(v, size_);
