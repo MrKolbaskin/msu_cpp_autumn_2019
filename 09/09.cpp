@@ -9,17 +9,16 @@
 
 using namespace std;
 
-#define CHUNK 1024 * 1024
+const size_t CHUNK = 1024 * 1024;
 
 const string F_PATH = "input";
 const string OUT_NAME = "output";
 const string TMP = "tmp";
 
 void create_bin(ofstream &out){
-	for(int i = 0; i < 100; ++i){
-		auto tmp_num = new uint64_t (rand() % 100);
-		out.write((char *)tmp_num, sizeof(uint64_t));
-		delete tmp_num;
+	for(int i = 0; i < 1024 * 1023; ++i){
+		uint64_t tmp_num = rand() % 100;
+		out.write((char *) &tmp_num, sizeof(uint64_t));
 	}
 }
 
@@ -51,8 +50,7 @@ void copy_file(const string& name_in, const string& name_out){
 
 void merge_files(vector<string>& names){
 	copy_file(names[0], OUT_NAME);
-	auto *num1 = new uint64_t;
-	auto *num2 = new uint64_t;
+	uint64_t num1, num2;
 	for(size_t i = 1; i < names.size(); ++i){
 		copy_file(OUT_NAME, TMP);
 		ofstream out(OUT_NAME, ios::binary);
@@ -60,45 +58,42 @@ void merge_files(vector<string>& names){
 		ifstream out_tmp(TMP, ios::binary);
 		ifstream tmp(names[i], ios::binary);
 
-		out_tmp.read((char*) num1, sizeof(uint64_t));
-		tmp.read((char*) num2, sizeof(uint64_t));
+		out_tmp.read((char*) &num1, sizeof(uint64_t));
+		tmp.read((char*) &num2, sizeof(uint64_t));
 			
 		while(!tmp.eof()) {
 			if(out_tmp.gcount() == 0) {
 				while(!tmp.eof()){
-					out.write((char*) num2, sizeof(uint64_t));
-					tmp.read((char*) num2, sizeof(uint64_t));
+					out.write((char*) &num2, sizeof(uint64_t));
+					tmp.read((char*) &num2, sizeof(uint64_t));
 				}
-			} else if(*num2 > *num1) {
-				out.write((char*) num1, sizeof(uint64_t));
-				out_tmp.read((char*) num1, sizeof(uint64_t));
+			} else if(num2 > num1) {
+				out.write((char*) &num1, sizeof(uint64_t));
+				out_tmp.read((char*) &num1, sizeof(uint64_t));
 			} else {
-				out.write((char*) num2, sizeof(uint64_t));
-				tmp.read((char*) num2, sizeof(uint64_t));
+				out.write((char*) &num2, sizeof(uint64_t));
+				tmp.read((char*) &num2, sizeof(uint64_t));
 			}
-		}			
-
-		while(!out_tmp.eof()) {
-			out.write((char*) num1, sizeof(uint64_t));
-			auto *buf = new uint64_t[CHUNK];
-
-			out_tmp.read((char*) buf, CHUNK);
-			size_t count = out_tmp.gcount();
-
-			out.write((char*) buf, count);
-			delete[] buf;
 		}
 
-		out.close();
-		out_tmp.close();
-		tmp.close();
+		if(out_tmp.gcount() != 0){
+			out.write((char*) &num1, sizeof(uint64_t));
+			auto *buf = new uint64_t[CHUNK];
+			
+			while(!out_tmp.eof()) {
+				out_tmp.read((char*) buf, CHUNK);
+				size_t count = out_tmp.gcount();
+
+				out.write((char*) buf, count);
+				delete[] buf;
+			}
+		}
+
 	}
-	delete num1; 
-	delete num2;
 }
 
 void clear_tm_files(vector<string>& names){
-	for(auto name: names){
+	for(auto &name: names){
 		remove(name.c_str());
 	}
 	remove(TMP.c_str());
@@ -140,6 +135,10 @@ int main()
             th2.join();
 
 			out.open(name_tmp, ios::binary);
+			if(!out.is_open()){
+				std::cout << "File not open " << name_tmp << std::endl;
+				return 1;
+			}
 			out.write((char*) buf, read_count * sizeof(uint64_t));
 			out.close();
 			++i;
@@ -147,6 +146,10 @@ int main()
 			name_tmp = OUT_NAME + toString(i) + ".bin";
 			files_name.push_back(name_tmp);
 			out.open(name_tmp, ios::binary);
+			if(!out.is_open()){
+				std::cout << "File not open " << name_tmp << std::endl;
+				return 1;
+			}
 			out.write((char*) (buf + read_count), count - read_count * sizeof(uint64_t));
 			out.close();
 			++i;
