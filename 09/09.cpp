@@ -134,7 +134,7 @@ int main()
             th1.join();
             th2.join();
 
-			out.open(name_tmp, ios::binary);
+            out.open(name_tmp, ios::binary);
 			if(!out.is_open()){
 				std::cout << "File not open " << name_tmp << std::endl;
 				return 1;
