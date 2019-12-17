@@ -126,10 +126,10 @@ int main()
 				sort(buf, buf + read_count); 
 			});
 
-            thread th2([buf, count]() {
-                sort(buf + count / (2 * sizeof(uint64_t)),
-                     buf + count / sizeof(uint64_t));
-            });
+			thread th2([buf, count]() {
+				sort(buf + count / (2 * sizeof(uint64_t)),
+					buf + count / sizeof(uint64_t));
+			});
 
 			th1.join();
 			th2.join();
