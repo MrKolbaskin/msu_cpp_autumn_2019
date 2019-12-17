@@ -10,7 +10,6 @@
 using namespace std;
 
 const size_t CHUNK = 1024 * 1024;
-
 const string F_PATH = "input";
 const string OUT_NAME = "output";
 const string TMP = "tmp";
