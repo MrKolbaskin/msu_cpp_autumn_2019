@@ -121,7 +121,7 @@ int main()
 
 		if(count != 0){
 			size_t read_count = count / (2 * sizeof(uint64_t));
-			
+
 			thread th1([buf, read_count]() { 
 				sort(buf, buf + read_count); 
 			});
@@ -135,8 +135,8 @@ int main()
             th2.join();
 
             out.open(name_tmp, ios::binary);
-			if(!out.is_open()){
-				std::cout << "File not open " << name_tmp << std::endl;
+            if(!out.is_open()){
+            	std::cout << "File not open " << name_tmp << std::endl;
 				return 1;
 			}
 			out.write((char*) buf, read_count * sizeof(uint64_t));
