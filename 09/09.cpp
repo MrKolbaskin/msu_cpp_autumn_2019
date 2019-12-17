@@ -84,8 +84,8 @@ void merge_files(vector<string>& names){
 				size_t count = out_tmp.gcount();
 
 				out.write((char*) buf, count);
-				delete[] buf;
 			}
+			delete[] buf;
 		}
 
 	}
@@ -136,6 +136,7 @@ int main()
 			out.open(name_tmp, ios::binary);
 			if(!out.is_open()){
 				std::cout << "File not open " << name_tmp << std::endl;
+				delete[] buf;
 				return 1;
 			}
 			out.write((char*) buf, read_count * sizeof(uint64_t));
@@ -147,6 +148,7 @@ int main()
 			out.open(name_tmp, ios::binary);
 			if(!out.is_open()){
 				std::cout << "File not open " << name_tmp << std::endl;
+				delete[] buf;
 				return 1;
 			}
 			out.write((char*) (buf + read_count), count - read_count * sizeof(uint64_t));
